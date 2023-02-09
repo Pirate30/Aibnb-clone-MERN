@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useContext, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import AccountNav from "../components/AccountNav";
 import Header from "../components/Header";
 import Places from "../components/Places";
 import { UserContext } from "../UserContext";
@@ -18,15 +19,15 @@ function Account() {
     return <Navigate to="/login" />;
   }
 
-  const activeClasses = (type = null) => {
-    let classes = "p-2 px-4";
-    if (type === subpage) {
-      classes += " bg-primary text-white rounded-full";
-    } else {
-      classes += " bg-gray-200 rounded-full";
-    }
-    return classes;
-  };
+  // const activeClasses = (type = null) => {
+  //   let classes = "p-2 px-4";
+  //   if (type === subpage) {
+  //     classes += " bg-primary text-white rounded-full";
+  //   } else {
+  //     classes += " bg-gray-200 rounded-full";
+  //   }
+  //   return classes;
+  // };
 
   const handleLogout = async () => {
     await axios.post("/logout");
@@ -42,20 +43,7 @@ function Account() {
     <>
       <Header />
       {/* <div>account for {user?.name}</div> */}
-      <nav className="w-full flex justify-center mt-8 gap-2 mb-8">
-        <Link to={"/acount"} className={activeClasses("profile")}>
-          My Profile
-        </Link>
-        <Link to={"/acount/bookings"} className={activeClasses("bookings")}>
-          My Bookings
-        </Link>
-        <Link
-          to={"/acount/accomodations"}
-          className={activeClasses("accomodations")}
-        >
-          My Accomodations
-        </Link>
-      </nav>
+      <AccountNav />
       {subpage === "profile" && (
         <div className="text-center max-w-lg mx-auto">
           Logged in as {user.name} : {user.email}
