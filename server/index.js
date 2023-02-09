@@ -9,6 +9,7 @@ const multer = require("multer");
 const fs = require("fs");
 
 const UserModel = require("./models/User");
+const PlaceModel = require("./models/Place");
 const cookieParser = require("cookie-parser");
 
 const mongoURI = process.env.MONGO_URI;
@@ -120,4 +121,92 @@ app.post("/upload", photoMulter.array("photos", 100), async (req, res) => {
   res.json(uploadedFiles);
 });
 
+app.post("/add-place", async (req, res) => {
+  const {
+    title,
+    address,
+    addedPhotos,
+    photoLink,
+    description,
+    perks,
+    extraInfo,
+    checkIn,
+    checkOut,
+    maxGuests,
+  } = req.body;
+  const { token } = req.cookies;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, data) => {
+      if (err) throw err;
+      const place = await PlaceModel.create({
+        owner: data.id,
+        title,
+        address,
+        photos: addedPhotos,
+        description,
+        perks,
+        extraInfo,
+        checkIn,
+        checkOut,
+        maxGuests,
+      });
+      res.json(place);
+    });
+  }
+});
+app.put("/add-place", async (req, res) => {
+  const {
+    id,
+    title,
+    address,
+    addedPhotos,
+    photoLink,
+    description,
+    perks,
+    extraInfo,
+    checkIn,
+    checkOut,
+    maxGuests,
+  } = req.body;
+  const { token } = req.cookies;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, data) => {
+      if (err) throw err;
+      const place = await PlaceModel.findById(id);
+      if (data.id === place.owner.toString()) {
+        place.set({
+          title,
+          address,
+          photos: addedPhotos,
+          description,
+          perks,
+          extraInfo,
+          checkIn,
+          checkOut,
+          maxGuests,
+        });
+        await place.save();
+        res.json("ok");
+      }
+    });
+  }
+});
+
+app.get("/places", async (req, res) => {
+  const { token } = req.cookies;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, data) => {
+      if (err) throw err;
+      const place = await PlaceModel.find({
+        owner: data.id,
+      });
+      res.json(place);
+    });
+  }
+});
+
+app.get("/places/:id", async (req, res) => {
+  const { id } = req.params;
+  res.json(await PlaceModel.findById(id));
+});
 app.listen(5000);
